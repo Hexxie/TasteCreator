@@ -6,12 +6,21 @@ d3.json("nutriforge.json").then(data => {
   const nodes = Array.from(new Set(data.links.flatMap(link => [link.source, link.target])))
             .map(id => ({ id }));
 
+  let currentNode = null;
+
+  //Search of the product and highlight it on graph
+  d3.select("#search-btn").on("click", function() {
+    currentNode = d3.select("#input-box").property("value");
+    console.log(currentNode)
+    highlightCurrentNode(currentNode);
+
+    d3.select("#input-box").property("value", "");
+  });
+
   var node = d3.select("svg").selectAll("circle")
                               .data(nodes).enter()
                               .append("circle")
                               .attr("r", 12)
-                              .attr("stroke", "white")
-                              .attr("fill", "orange")
                               .classed("node", true)
                               .classed("fixed", d => d.fx != undefined)
                               .on("mouseover", function (event, d) {
@@ -45,13 +54,10 @@ d3.json("nutriforge.json").then(data => {
                               .append("text")
                               .attr("class", "label")
                               .attr("id", d => `label-${d.id}`)
-                              .attr("font-family", "Arial")
-                              .attr("font-size", "12px")
-                              .attr("fill", "black")
-                              .attr("x", d => d.x + 15)
-                              .attr("y", d => d.y - 15)
+                              .attr("x", d => (d.x !== undefined ? d.x + 15 : 0))
+                              .attr("y", d => (d.y !== undefined ? d.y - 15 : 0))
                               .text(d => d.id)
-                              .style("visibility", "hidden");;
+                              .style("visibility", d => d.id === currentNode ? "visible" : "hidden");
 
   node.raise();
 
@@ -73,8 +79,8 @@ d3.json("nutriforge.json").then(data => {
     .attr("cy", d => d.y);
 
     labels
-    .attr("x", d => d.x + 15) // Текст відображається трохи правіше від нода
-    .attr("y", d => d.y - 15); // Текст відображається трохи вище від нода
+    .attr("x", d => d.x + 15)
+    .attr("y", d => d.y - 15);
 
       link
       .attr("x1", d => d.source.x)
@@ -115,3 +121,13 @@ d3.json("nutriforge.json").then(data => {
   }
 
 });
+
+
+function highlightCurrentNode(currentNode) {                                  
+  d3.selectAll("circle")
+    .filter(d => d.id === currentNode)
+    .classed("fixed", true);
+
+  d3.select(`#label-${currentNode}`)
+    .style("visibility", "visible");
+}
