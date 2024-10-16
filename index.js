@@ -7,12 +7,30 @@ d3.json("nutriforge.json").then(data => {
             .map(id => ({ id }));
 
   let currentNode = null;
+  let currentNodes = [];
+
+  function addCurrentNode(currentNode) {
+    const index = currentNodes.indexOf(currentNode);
+    if (index === -1) {
+      currentNodes.push(currentNode);
+    }
+    console.log(currentNodes);
+  }
+
+  function removeCurrentNode(currentNode) {
+    const index = currentNodes.indexOf(currentNode);
+    if (index !== -1) {
+      currentNodes.splice(index, 1);
+    }
+    console.log(currentNodes);
+  }
 
   //Search of the product and highlight it on graph
   d3.select("#search-btn").on("click", function() {
     currentNode = d3.select("#input-box").property("value");
     console.log(currentNode)
     highlightCurrentNode(currentNode);
+    addCurrentNode(currentNode);
 
     d3.select("#input-box").property("value", "");
   });
@@ -91,17 +109,21 @@ d3.json("nutriforge.json").then(data => {
   }
   function click(event, d) {
     // Якщо вузол вже фіксований, то розфіксовуємо його
+    currentNode = d.id;
+
     if (d.fx !== undefined) {
       delete d.fx;
       delete d.fy;
       d3.select(this).classed("fixed", false);
       d3.select(`#label-${d.id}`).style("visibility", "hidden"); // Приховуємо текст при розфіксації
+      removeCurrentNode(currentNode);
     } else {
       // Якщо не фіксований, фіксуємо його на поточній позиції
       d.fx = d.x;
       d.fy = d.y;
       d3.select(this).classed("fixed", true);
       d3.select(`#label-${d.id}`).style("visibility", "visible"); // Залишаємо текст видимим
+      addCurrentNode(currentNode);
     }
     simulation.alpha(1).restart();
   }
@@ -122,7 +144,6 @@ d3.json("nutriforge.json").then(data => {
 
 });
 
-
 function highlightCurrentNode(currentNode) {                                  
   d3.selectAll("circle")
     .filter(d => d.id === currentNode)
@@ -130,4 +151,19 @@ function highlightCurrentNode(currentNode) {
 
   d3.select(`#label-${currentNode}`)
     .style("visibility", "visible");
+}
+
+function findNearestNodes(currentNodes) {
+  // Фільтруємо зв'язки, де source або target є одним із вибраних вузлів у масиві currentNodes
+  const filteredLinks = links.filter(link => 
+    currentNodes.includes(link.source) || currentNodes.includes(link.target)
+  );
+
+  // Створюємо множину всіх вузлів, які з'єднані з будь-яким з currentNodes
+  const connectedNodes = new Set(filteredLinks.flatMap(link => [link.source, link.target]));
+
+  // Фільтруємо вузли, залишаючи тільки ті, що є у connectedNodes
+  const filteredNodes = nodes.filter(node => connectedNodes.has(node.id));
+
+  return { filteredNodes, filteredLinks }; // Повертаємо фільтровані вузли та зв'язки
 }
