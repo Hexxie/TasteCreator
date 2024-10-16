@@ -56,3 +56,26 @@ button {
 svg {
     border: 1px solid black; /* Add border for better visibility */
 }
+
+.link {
+    stroke: rgb(255, 213, 135);
+    stroke-width: 1.5px;
+}
+
+.link.fixed {
+    stroke: orange;
+    stroke-width: 1.5px;
+}
+
+.node {
+    cursor: move;
+    fill: rgb(255, 213, 135);
+    stroke: #000;
+    stroke-width: 1.5px;
+    opacity: 0.5;
+}
+
+.node.fixed {
+    fill: orange;
+    opacity: 1;
+}

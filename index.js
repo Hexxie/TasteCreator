@@ -20,23 +20,17 @@ d3.json("nutriforge.json").then(data => {
                                     .duration(200)
                                     .attr("r", 15); // Новий радіус
 
-                                    d3.select("svg").append("text")
-                                    .attr("id", "tooltip") // Ідентифікатор для видалення тексту пізніше
-                                    .attr("x", d.x + 15) // Позиція тексту відносно круга
-                                    .attr("y", d.y - 15)
-                                    .attr("font-family", "Arial")
-                                    .attr("font-size", "12px")
-                                    .attr("fill", "black")
-                                    .text(`${d.id}`); // Текст, який буде показаний
+                                    d3.select(`#label-${d.id}`).style("visibility", "visible");
                                 })
                                 .on("mouseout", function (event, d) {
                                   // Повертаємо початковий розмір при відведенні миші
                                   d3.select(this).transition()
                                     .duration(200)
                                     .attr("r", 12); // Початковий радіус
-
-                                  d3.select("#tooltip").remove();
-                                });
+                                    if (!d.fx) {
+                                      d3.select(`#label-${d.id}`).style("visibility", "hidden");
+                                    }
+                                  });
 
   var link = d3.select("svg").selectAll("line")
                               .data(data.links)
@@ -44,6 +38,22 @@ d3.json("nutriforge.json").then(data => {
                               .append("line")
                               .attr("stroke", "orange")
                               .classed("link", true)
+
+    // Додавання тексту для нодів
+  var labels = d3.select("svg").selectAll(".label")
+                              .data(nodes).enter()
+                              .append("text")
+                              .attr("class", "label")
+                              .attr("id", d => `label-${d.id}`)
+                              .attr("font-family", "Arial")
+                              .attr("font-size", "12px")
+                              .attr("fill", "black")
+                              .attr("x", d => d.x + 15)
+                              .attr("y", d => d.y - 15)
+                              .text(d => d.id)
+                              .style("visibility", "hidden");;
+
+  node.raise();
 
   const simulation = d3.forceSimulation(nodes)
                       .force("link", d3.forceLink(data.links).id(d => d.id)) 
@@ -58,20 +68,35 @@ d3.json("nutriforge.json").then(data => {
   node.call(drag).on("click", click);
 
   function ticked() {
+    node
+    .attr("cx", d => d.x)
+    .attr("cy", d => d.y);
+
+    labels
+    .attr("x", d => d.x + 15) // Текст відображається трохи правіше від нода
+    .attr("y", d => d.y - 15); // Текст відображається трохи вище від нода
+
       link
       .attr("x1", d => d.source.x)
       .attr("y1", d => d.source.y)
       .attr("x2", d => d.target.x)
       .attr("y2", d => d.target.y);
 
-      node
-      .attr("cx", d => d.x)
-      .attr("cy", d => d.y);
   }
   function click(event, d) {
-    delete d.fx;
-    delete d.fy;
-    d3.select(this).classed("fixed", false);
+    // Якщо вузол вже фіксований, то розфіксовуємо його
+    if (d.fx !== undefined) {
+      delete d.fx;
+      delete d.fy;
+      d3.select(this).classed("fixed", false);
+      d3.select(`#label-${d.id}`).style("visibility", "hidden"); // Приховуємо текст при розфіксації
+    } else {
+      // Якщо не фіксований, фіксуємо його на поточній позиції
+      d.fx = d.x;
+      d.fy = d.y;
+      d3.select(this).classed("fixed", true);
+      d3.select(`#label-${d.id}`).style("visibility", "visible"); // Залишаємо текст видимим
+    }
     simulation.alpha(1).restart();
   }
 
