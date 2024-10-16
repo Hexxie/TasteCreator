@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Graph</title>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="center-container">
+        <div class="search-box">
+            <div class="row">
+                <input type="text" id="input-box" placeholder="Start with product" autocomplete="off">
+                <button>Search</button>
+            </div>
+            <div class="result-box">
+                <ul>
+                    <li>Item 1</li>
+                    <li>Item 2</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="svg-container">
+        <svg width="500" height="500"></svg>
+    </div>
+</body>
+
+<script src="index.js"></script>
+</html>
