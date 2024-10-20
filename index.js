@@ -1,7 +1,7 @@
 d3.json("nutriforge.json").then(data => {
 
   let height = 500;
-  let width = 500;
+  let width = 1000;
 
   const nodes = Array.from(new Set(data.links.flatMap(link => [link.source, link.target])))
             .map(id => ({ id }));
@@ -15,6 +15,7 @@ d3.json("nutriforge.json").then(data => {
       currentNodes.push(currentNode);
     }
     console.log(currentNodes);
+    updateGraph(currentNodes);
   }
 
   function removeCurrentNode(currentNode) {
@@ -74,15 +75,19 @@ d3.json("nutriforge.json").then(data => {
                               .attr("id", d => `label-${d.id}`)
                               .attr("x", d => (d.x !== undefined ? d.x + 15 : 0))
                               .attr("y", d => (d.y !== undefined ? d.y - 15 : 0))
-                              .text(d => d.id)
-                              .style("visibility", d => d.id === currentNode ? "visible" : "hidden");
+                              .text(d => {
+                                console.log(d.id);
+                                return d.id;
+                              })
+                              .style("visibility", d => currentNodes.map(node => node.trim()).includes(d.id.trim()) ? "visible" : "hidden");
 
   node.raise();
+  labels.raise();
 
   const simulation = d3.forceSimulation(nodes)
                       .force("link", d3.forceLink(data.links).id(d => d.id)) 
                       .force("charge", d3.forceManyBody())
-                      .force("center", d3.forceCenter(200, 200))
+                      .force("center", d3.forceCenter(500, 250))
                       .on("tick", ticked);
                     
   const drag = d3.drag()
@@ -142,28 +147,56 @@ d3.json("nutriforge.json").then(data => {
     simulation.alpha(1).restart();
   }
 
+
+  function highlightCurrentNode(currentNode) {                                  
+    d3.selectAll("circle")
+      .filter(d => d.id === currentNode)
+      .classed("fixed", true);
+  
+    d3.select(`#label-${currentNode}`)
+      .style("visibility", "visible");
+  }
+  
+  function findNearestNodes(currentNodes) {
+    // Фільтруємо зв'язки, де source або target є одним із вибраних вузлів у масиві currentNodes
+    
+    const filteredLinks = links.filter(link => 
+      currentNodes.includes(link.source) || currentNodes.includes(link.target)
+    );
+  
+    // Створюємо множину всіх вузлів, які з'єднані з будь-яким з currentNodes
+    const connectedNodes = new Set(filteredLinks.flatMap(link => [link.source, link.target]));
+  
+    // Фільтруємо вузли, залишаючи тільки ті, що є у connectedNodes
+    const filteredNodes = nodes.filter(node => connectedNodes.has(node.id));
+  
+    return { filteredNodes, filteredLinks }; // Повертаємо фільтровані вузли та зв'язки
+  }
+  
+  function updateGraph(currentNodes) {
+    // Фільтруємо зв'язки, які мають source або target у selectedNodes
+    const filteredLinks = data.links.filter(link => 
+      currentNodes.includes(link.source.id) || currentNodes.includes(link.target.id)
+    );
+    console.log(filteredLinks)
+    console.log(link.source)
+    console.log(link.target)
+    console.log(currentNodes)
+  
+    // Створюємо множину всіх вузлів, які з'єднані з вузлами у selectedNodes
+    const connectedNodes = new Set(filteredLinks.flatMap(link => [link.source.id, link.target.id]));
+    console.log(connectedNodes)
+  
+    // Додаємо обрані вузли до connectedNodes, щоб вони залишалися видимими
+    nodes.forEach(nodeId => connectedNodes.add(nodeId));
+  
+    // Оновлюємо видимість вузлів
+    node
+      .style("opacity", d => connectedNodes.has(d.id) ? 1 : 0); // Приховуємо не пов'язані вузли
+  
+    // Оновлюємо видимість зв'язків
+    link
+      .style("opacity", d => (currentNodes.includes(d.source.id) || currentNodes.includes(d.target.id)) ? 1 : 0);
+  }
+
 });
-
-function highlightCurrentNode(currentNode) {                                  
-  d3.selectAll("circle")
-    .filter(d => d.id === currentNode)
-    .classed("fixed", true);
-
-  d3.select(`#label-${currentNode}`)
-    .style("visibility", "visible");
-}
-
-function findNearestNodes(currentNodes) {
-  // Фільтруємо зв'язки, де source або target є одним із вибраних вузлів у масиві currentNodes
-  const filteredLinks = links.filter(link => 
-    currentNodes.includes(link.source) || currentNodes.includes(link.target)
-  );
-
-  // Створюємо множину всіх вузлів, які з'єднані з будь-яким з currentNodes
-  const connectedNodes = new Set(filteredLinks.flatMap(link => [link.source, link.target]));
-
-  // Фільтруємо вузли, залишаючи тільки ті, що є у connectedNodes
-  const filteredNodes = nodes.filter(node => connectedNodes.has(node.id));
-
-  return { filteredNodes, filteredLinks }; // Повертаємо фільтровані вузли та зв'язки
-}

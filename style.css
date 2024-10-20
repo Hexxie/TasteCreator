@@ -50,16 +50,32 @@ button {
 }
 
 .svg-container {
-    margin-bottom: 100px;
+    display: flex;
+    align-items: center;
 }
 
 svg {
-    border: 1px solid black; /* Add border for better visibility */
+   /* border: 1px solid black;   Add border for better visibility */
+    margin-right: 20px;
 }
 
 .link {
     stroke: rgb(255, 213, 135);
     stroke-width: 1.5px;
+}
+
+.recipe-space {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.taste-mixer {
+    background: #f0f0f0;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 200px;
 }
 
 .link.fixed {
