@@ -14,6 +14,7 @@ d3.json("nutriforge.json").then(data => {
     if (index === -1) {
       currentNodes.push(currentNode);
     }
+    d3.select("#recipe-list").selectAll("li").data(currentNodes, d => d).enter().append("li").text(d => d);
     console.log(currentNodes);
     updateGraph(currentNodes);
   }
