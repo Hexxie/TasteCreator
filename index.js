@@ -49,7 +49,7 @@ d3.json("nutriforge.json").then(data => {
                                     .duration(200)
                                     .attr("r", 15); // Новий радіус
 
-                                    d3.select(`#label-${d.id}`).style("visibility", "visible");
+                                    d3.select(`#label-${d.id.replace(/\s+/g, "_")}`).style("visibility", "visible");
                                 })
                                 .on("mouseout", function (event, d) {
                                   // Повертаємо початковий розмір при відведенні миші
@@ -57,7 +57,7 @@ d3.json("nutriforge.json").then(data => {
                                     .duration(200)
                                     .attr("r", 12); // Початковий радіус
                                     if (!d.fx) {
-                                      d3.select(`#label-${d.id}`).style("visibility", "hidden");
+                                      d3.select(`#label-${d.id.replace(/\s+/g, "_")}`).style("visibility", "hidden");
                                     }
                                   });
 
@@ -73,7 +73,7 @@ d3.json("nutriforge.json").then(data => {
                               .data(nodes).enter()
                               .append("text")
                               .attr("class", "label")
-                              .attr("id", d => `label-${d.id}`)
+                              .attr("id", d => `label-${d.id.replace(/\s+/g, "_")}`)
                               .attr("x", d => (d.x !== undefined ? d.x + 15 : 0))
                               .attr("y", d => (d.y !== undefined ? d.y - 15 : 0))
                               .text(d => {
@@ -121,14 +121,14 @@ d3.json("nutriforge.json").then(data => {
       delete d.fx;
       delete d.fy;
       d3.select(this).classed("fixed", false);
-      d3.select(`#label-${d.id}`).style("visibility", "hidden"); // Приховуємо текст при розфіксації
+      d3.select(`#label-${d.id.replace(/\s+/g, "_")}`).style("visibility", "hidden"); // Приховуємо текст при розфіксації
       removeCurrentNode(currentNode);
     } else {
       // Якщо не фіксований, фіксуємо його на поточній позиції
       d.fx = d.x;
       d.fy = d.y;
       d3.select(this).classed("fixed", true);
-      d3.select(`#label-${d.id}`).style("visibility", "visible"); // Залишаємо текст видимим
+      d3.select(`#label-${d.id.replace(/\s+/g, "_")}`).style("visibility", "visible"); // Залишаємо текст видимим
       addCurrentNode(currentNode);
     }
     simulation.alpha(1).restart();
@@ -154,7 +154,7 @@ d3.json("nutriforge.json").then(data => {
       .filter(d => d.id === currentNode)
       .classed("fixed", true);
   
-    d3.select(`#label-${currentNode}`)
+    d3.select(`#label-${currentNode.replace(/\s+/g, "_")}`)
       .style("visibility", "visible");
   }
   
