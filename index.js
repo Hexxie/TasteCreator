@@ -14,7 +14,23 @@ d3.json("nutriforge.json").then(data => {
     if (index === -1) {
       currentNodes.push(currentNode);
     }
+    // This line to add a new item into the recipe (TODO)
     d3.select("#recipe-list").selectAll("li").data(currentNodes, d => d).enter().append("li").text(d => d);
+
+    // This line to fetch taste from  the python
+    //const url = `http://127.0.0.1:5000/get_flavors?product=${currentNode}`;
+    const url = `http://127.0.0.1:5000/get_flavors?product=Eggplant`;
+    console.log(url)
+    fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                console.log('Flavor Count:', data); // Виведення даних у консоль
+               // document.getElementById("flavor-output").innerText = JSON.stringify(data);
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+            });
+
     console.log(currentNodes);
     updateGraph(currentNodes);
   }
