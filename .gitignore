@@ -1,3 +1,4 @@
 python/venv/*
 python/output.html
 python/rows.txt
+.DS_Store

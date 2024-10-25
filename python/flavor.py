@@ -19,7 +19,8 @@ def get_flavors():
     keywords = ["sweet", "sour", "bitter", "salty", "umami"]
     flavor_count = {key: 0 for key in keywords}
 
-    search_product_url = "https://cosylab.iiitd.edu.in/flavordb2/entities?entity=eggplant&category="
+    search_product_url = f"https://cosylab.iiitd.edu.in/flavordb2/entities?entity={product}&category="
+    print(search_product_url)
     response = requests.get(search_product_url)
 
     data = json.loads(response.json())

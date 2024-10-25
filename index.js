@@ -1,4 +1,6 @@
-d3.json("nutriforge.json").then(data => {
+Promise.all([
+  d3.json("data/nutriforge.json"),
+  d3.json("data/translations.json")]).then(([data, translations]) => {
 
   let height = 500;
   let width = 1000;
@@ -19,7 +21,7 @@ d3.json("nutriforge.json").then(data => {
 
     // This line to fetch taste from  the python
     //const url = `http://127.0.0.1:5000/get_flavors?product=${currentNode}`;
-    const url = `http://127.0.0.1:8000/get_flavors?product=Eggplant`;
+    const url = `http://127.0.0.1:8000/get_flavors?product=${translations[currentNode]}`;
     console.log(url)
     fetch(url)
             .then(response => response.json())
