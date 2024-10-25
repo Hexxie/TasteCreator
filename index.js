@@ -19,7 +19,7 @@ d3.json("nutriforge.json").then(data => {
 
     // This line to fetch taste from  the python
     //const url = `http://127.0.0.1:5000/get_flavors?product=${currentNode}`;
-    const url = `http://127.0.0.1:5000/get_flavors?product=Eggplant`;
+    const url = `http://127.0.0.1:8000/get_flavors?product=Eggplant`;
     console.log(url)
     fetch(url)
             .then(response => response.json())
