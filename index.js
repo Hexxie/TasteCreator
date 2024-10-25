@@ -52,7 +52,7 @@ function updateTasteList() {
       });
       updateTasteList();
   } else {
-      const url = `http://127.0.0.1:8000/get_flavors?product=${translations[currentNode]}`;
+      const url = `http://127.0.0.1:8000/get_flavors?product=${encodeURIComponent(translations[currentNode])}`;
       console.log(url)
       fetch(url)
           .then(response => response.json())
