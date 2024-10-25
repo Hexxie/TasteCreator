@@ -11,6 +11,28 @@ Promise.all([
   let currentNode = null;
   let currentNodes = [];
 
+  let totalFlavors = { bitter: 0, salty: 0, sour: 0, sweet: 0, umami: 0 };
+  let nodeFlavors = {};
+
+  const flavorNames = {
+    bitter: "Гіркий",
+    salty: "Солоний",
+    sour: "Кислий",
+    sweet: "Солодкий",
+    umami: "Пряний"
+};
+
+function updateTasteList() {
+  d3.select("#taste-list").selectAll("li").remove();
+  
+  d3.select("#taste-list")
+      .selectAll("li")
+      .data(Object.entries(totalFlavors).filter(([key, value]) => value > 0))
+      .enter()
+      .append("li")
+      .text(([key, value]) => `${flavorNames[key]}: ${value}`);
+}
+
   function addCurrentNode(currentNode) {
     const index = currentNodes.indexOf(currentNode);
     if (index === -1) {
@@ -20,19 +42,34 @@ Promise.all([
     d3.select("#recipe-list").selectAll("li").data(currentNodes, d => d).enter().append("li").text(d => d);
 
     // This line to fetch taste from  the python (TODO)
-    const url = `http://127.0.0.1:8000/get_flavors?product=${translations[currentNode]}`;
-    console.log(url)
-    fetch(url)
-            .then(response => response.json())
-            .then(flavors => {
-                console.log('Flavor Count:', flavors); // Виведення даних у консоль
-                d3.select("#taste-list").selectAll("li").data(Object.entries(flavors).filter(([key, value]) => value > 0))
-                .enter().append("li").text(([key, value]) => `${key}: ${value}`);
-               // document.getElementById("flavor-output").innerText = JSON.stringify(data);
-            })
-            .catch(error => {
-                console.error('Error fetching data:', error);
-            });
+    if (nodeFlavors[currentNode]) {
+      // Додаємо значення з уже збережених смаків
+      Object.keys(nodeFlavors[currentNode]).forEach(key => {
+          totalFlavors[key] += nodeFlavors[currentNode][key];
+      });
+      updateTasteList();
+  } else {
+      const url = `http://127.0.0.1:8000/get_flavors?product=${translations[currentNode]}`;
+      console.log(url)
+      fetch(url)
+          .then(response => response.json())
+          .then(flavors => {
+              console.log('Flavor Count:', flavors);
+
+              // Зберігаємо отримані смакі для вузла в nodeFlavors
+              nodeFlavors[currentNode] = flavors;
+
+              // Додаємо значення смаків до totalFlavors
+              Object.keys(flavors).forEach(key => {
+                  totalFlavors[key] += flavors[key];
+              });
+
+              updateTasteList();
+          })
+          .catch(error => {
+              console.error('Error fetching data:', error);
+          });
+        }
 
     console.log(currentNodes);
     updateGraph(currentNodes);
@@ -42,6 +79,13 @@ Promise.all([
     const index = currentNodes.indexOf(currentNode);
     if (index !== -1) {
       currentNodes.splice(index, 1);
+
+      if (nodeFlavors[currentNode]) {
+        Object.keys(nodeFlavors[currentNode]).forEach(key => {
+            totalFlavors[key] -= nodeFlavors[currentNode][key];
+        });
+        updateTasteList();
+    }
     }
     console.log(currentNodes);
   }
@@ -175,22 +219,6 @@ Promise.all([
   
     d3.select(`#label-${currentNode.replace(/\s+/g, "_")}`)
       .style("visibility", "visible");
-  }
-  
-  function findNearestNodes(currentNodes) {
-    // Фільтруємо зв'язки, де source або target є одним із вибраних вузлів у масиві currentNodes
-    
-    const filteredLinks = links.filter(link => 
-      currentNodes.includes(link.source) || currentNodes.includes(link.target)
-    );
-  
-    // Створюємо множину всіх вузлів, які з'єднані з будь-яким з currentNodes
-    const connectedNodes = new Set(filteredLinks.flatMap(link => [link.source, link.target]));
-  
-    // Фільтруємо вузли, залишаючи тільки ті, що є у connectedNodes
-    const filteredNodes = nodes.filter(node => connectedNodes.has(node.id));
-  
-    return { filteredNodes, filteredLinks }; // Повертаємо фільтровані вузли та зв'язки
   }
   
   function updateGraph(currentNodes) {
