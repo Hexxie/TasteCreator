@@ -27,7 +27,10 @@ function updateTasteList() {
   
   d3.select("#taste-list")
       .selectAll("li")
-      .data(Object.entries(totalFlavors).filter(([key, value]) => value > 0))
+      .data(
+        Object.entries(totalFlavors)
+        .filter(([key, value]) => value > 0)
+        .sort((a, b) => b[1] - a[1]))
       .enter()
       .append("li")
       .text(([key, value]) => `${flavorNames[key]}: ${value}`);
