@@ -19,14 +19,15 @@ Promise.all([
     // This line to add a new item into the recipe (TODO)
     d3.select("#recipe-list").selectAll("li").data(currentNodes, d => d).enter().append("li").text(d => d);
 
-    // This line to fetch taste from  the python
-    //const url = `http://127.0.0.1:5000/get_flavors?product=${currentNode}`;
+    // This line to fetch taste from  the python (TODO)
     const url = `http://127.0.0.1:8000/get_flavors?product=${translations[currentNode]}`;
     console.log(url)
     fetch(url)
             .then(response => response.json())
-            .then(data => {
-                console.log('Flavor Count:', data); // Виведення даних у консоль
+            .then(flavors => {
+                console.log('Flavor Count:', flavors); // Виведення даних у консоль
+                d3.select("#taste-list").selectAll("li").data(Object.entries(flavors).filter(([key, value]) => value > 0))
+                .enter().append("li").text(([key, value]) => `${key}: ${value}`);
                // document.getElementById("flavor-output").innerText = JSON.stringify(data);
             })
             .catch(error => {
@@ -95,7 +96,7 @@ Promise.all([
                               .attr("x", d => (d.x !== undefined ? d.x + 15 : 0))
                               .attr("y", d => (d.y !== undefined ? d.y - 15 : 0))
                               .text(d => {
-                                console.log(d.id);
+                              //  console.log(d.id);
                                 return d.id;
                               })
                               .style("visibility", d => currentNodes.map(node => node.trim()).includes(d.id.trim()) ? "visible" : "hidden");
