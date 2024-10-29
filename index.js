@@ -33,7 +33,36 @@ function updateTasteList() {
         .sort((a, b) => b[1] - a[1]))
       .enter()
       .append("li")
+      
       .text(([key, value]) => `${flavorNames[key]}: ${value}`);
+}
+
+function updateRecipeList() {
+
+  d3.select("#recipe-list")
+    .selectAll("li")
+    .data(currentNodes, d => d)
+    .enter()
+    .append("li")
+    .each(function(d) {
+      d3.select(this)
+        .append("span")
+        .text(d + ": ");
+      
+      d3.select(this)
+        .append("input")
+        .attr("type", "number")
+        .attr("value", 100)
+        .attr("min", 1)
+        .on("input", function() {
+          d.weight = +this.value;
+          console.log(d + " weight new value: " + this.value)
+        });
+      
+      d3.select(this)
+        .append("span")
+        .text(" г");
+    });
 }
 
   function addCurrentNode(currentNode) {
@@ -42,7 +71,8 @@ function updateTasteList() {
       currentNodes.push(currentNode);
     }
     // This line to add a new item into the recipe (TODO)
-    d3.select("#recipe-list").selectAll("li").data(currentNodes, d => d).enter().append("li").text(d => d);
+    //d3.select("#recipe-list").selectAll("li").data(currentNodes, d => d).enter().append("li").text(d => d);
+    updateRecipeList();
 
     // This line to fetch taste from  the python (TODO)
     if (nodeFlavors[currentNode]) {
