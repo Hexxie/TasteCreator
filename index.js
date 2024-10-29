@@ -1,6 +1,7 @@
 Promise.all([
   d3.json("data/nutriforge.json"),
-  d3.json("data/translations.json")]).then(([data, translations]) => {
+  d3.json("data/tasteprofiles.json"),
+  d3.json("data/translations.json")]).then(([data, tasteprofiles, translations]) => {
 
   let height = 500;
   let width = 1000;
@@ -70,8 +71,6 @@ function updateRecipeList() {
     if (index === -1) {
       currentNodes.push(currentNode);
     }
-    // This line to add a new item into the recipe (TODO)
-    //d3.select("#recipe-list").selectAll("li").data(currentNodes, d => d).enter().append("li").text(d => d);
     updateRecipeList();
 
     // This line to fetch taste from  the python (TODO)
@@ -82,27 +81,19 @@ function updateRecipeList() {
       });
       updateTasteList();
   } else {
-      const url = `http://127.0.0.1:8000/get_flavors?product=${encodeURIComponent(translations[currentNode])}`;
-      console.log(url)
-      fetch(url)
-          .then(response => response.json())
-          .then(flavors => {
-              console.log('Flavor Count:', flavors);
+    const product = tasteprofiles.find(item => item.product === currentNode);
+    console.log('Flavor Count:', product.taste);
 
-              // Зберігаємо отримані смакі для вузла в nodeFlavors
-              nodeFlavors[currentNode] = flavors;
+    // Зберігаємо отримані смакі для вузла в nodeFlavors
+    nodeFlavors[currentNode] = product.taste;
 
-              // Додаємо значення смаків до totalFlavors
-              Object.keys(flavors).forEach(key => {
-                  totalFlavors[key] += flavors[key];
-              });
+    // Додаємо значення смаків до totalFlavors
+    Object.keys(product.taste).forEach(key => {
+      totalFlavors[key] += product.taste[key];
+    });
 
-              updateTasteList();
-          })
-          .catch(error => {
-              console.error('Error fetching data:', error);
-          });
-        }
+    updateTasteList();
+  }
 
     console.log(currentNodes);
     updateGraph(currentNodes);
