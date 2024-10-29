@@ -15,6 +15,8 @@ Promise.all([
   let totalFlavors = { bitter: 0, salty: 0, sour: 0, sweet: 0, umami: 0 };
   let nodeFlavors = {};
 
+  let productWeights = {};
+
   const flavorNames = {
     bitter: "Гіркий",
     salty: "Солоний",
@@ -23,7 +25,28 @@ Promise.all([
     umami: "Пряний"
 };
 
+function updateTotalFlavors() {
+  // Обнуляємо значення totalFlavors
+  totalFlavors = { bitter: 0, salty: 0, sour: 0, sweet: 0, umami: 0 };
+
+  // Загальна вага всіх продуктів
+  let totalWeight = Object.values(productWeights).reduce((a, b) => a + Number(b), 0);
+  
+  // Обчислюємо внесок кожного продукту в totalFlavors
+  for (let product in productWeights) {
+    let weight = productWeights[product];
+    let flavors = nodeFlavors[product];
+    
+    // Зважено додаємо кожен смак до totalFlavors
+    for (let flavor in flavors) {
+      totalFlavors[flavor] += (flavors[flavor] * weight) / totalWeight;
+    }
+  }
+}
+
 function updateTasteList() {
+  updateTotalFlavors();
+
   d3.select("#taste-list").selectAll("li").remove();
   
   d3.select("#taste-list")
@@ -35,8 +58,10 @@ function updateTasteList() {
       .enter()
       .append("li")
       
-      .text(([key, value]) => `${flavorNames[key]}: ${value}`);
+      .text(([key, value]) => `${flavorNames[key]}: ${value.toFixed(2)}`);
 }
+
+let debounceTimer;
 
 function updateRecipeList() {
 
@@ -46,6 +71,7 @@ function updateRecipeList() {
     .enter()
     .append("li")
     .each(function(d) {
+      productWeights[d] = 100;
       d3.select(this)
         .append("span")
         .text(d + ": ");
@@ -56,8 +82,14 @@ function updateRecipeList() {
         .attr("value", 100)
         .attr("min", 1)
         .on("input", function() {
-          d.weight = +this.value;
           console.log(d + " weight new value: " + this.value)
+          productWeights[d] = this.value;
+
+          clearTimeout(debounceTimer);
+
+          debounceTimer = setTimeout(() => {
+            updateTasteList();
+          }, 500); // 500 ms delay
         });
       
       d3.select(this)
