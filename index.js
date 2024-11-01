@@ -95,7 +95,8 @@ function updateRecipeList() {
       d3.select(this)
         .append("span")
         .text(" г");
-    });
+    }),
+    exit => exit.remove();
 }
 
   function addCurrentNode(currentNode) {
@@ -140,6 +141,7 @@ function updateRecipeList() {
         Object.keys(nodeFlavors[currentNode]).forEach(key => {
             totalFlavors[key] -= nodeFlavors[currentNode][key];
         });
+        updateRecipeList();
         updateTasteList();
     }
     }
@@ -282,14 +284,9 @@ function updateRecipeList() {
     const filteredLinks = data.links.filter(link => 
       currentNodes.includes(link.source.id) || currentNodes.includes(link.target.id)
     );
-    console.log(filteredLinks)
-    console.log(link.source)
-    console.log(link.target)
-    console.log(currentNodes)
   
     // Створюємо множину всіх вузлів, які з'єднані з вузлами у selectedNodes
     const connectedNodes = new Set(filteredLinks.flatMap(link => [link.source.id, link.target.id]));
-    console.log(connectedNodes)
   
     // Додаємо обрані вузли до connectedNodes, щоб вони залишалися видимими
     nodes.forEach(nodeId => connectedNodes.add(nodeId));
