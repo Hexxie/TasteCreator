@@ -55,5 +55,14 @@
     {"product": "Кокосове молоко", "taste": {"bitter": 0, "salty": 0, "sour": 0, "sweet": 75, "umami": 0}},
     {"product": "Сметана", "taste": {"bitter": 0, "salty": 5, "sour": 15, "sweet": 5, "umami": 0}},
     {"product": "Інжир", "taste": {"bitter": 0, "salty": 0, "sour": 5, "sweet": 85, "umami": 0}},
-    {"product": "Часник", "taste": {"bitter": 5, "salty": 0, "sour": 0, "sweet": 0, "umami": 5}}
+    {"product": "Часник", "taste": {"bitter": 5, "salty": 0, "sour": 0, "sweet": 0, "umami": 5}},
+    {"product": "Аспарагус", "taste": {"bitter": 10, "salty": 0, "sour": 5, "sweet": 5, "umami": 5}},
+    {"product": "Бекон", "taste": {"bitter": 0, "salty": 30, "sour": 0, "sweet": 5, "umami": 20}},
+    {"product": "Печериці", "taste": {"bitter": 0, "salty": 0, "sour": 0, "sweet": 5, "umami": 15}},
+    {"product": "Оливки", "taste": {"bitter": 10, "salty": 20, "sour": 5, "sweet": 0, "umami": 5}},
+    {"product": "Сіль", "taste": {"bitter": 0, "salty": 100, "sour": 0, "sweet": 0, "umami": 0}},
+    {"product": "Сосиски", "taste": {"bitter": 0, "salty": 20, "sour": 0, "sweet": 5, "umami": 15}},
+    {"product": "Вершкове масло", "taste": {"bitter": 0, "salty": 5, "sour": 0, "sweet": 10, "umami": 0}},
+    {"product": "Каррі", "taste": {"bitter": 15, "salty": 5, "sour": 5, "sweet": 5, "umami": 0}},
+    {"product": "Імбир", "taste": {"bitter": 5, "salty": 0, "sour": 10, "sweet": 10, "umami": 0}}
 ]

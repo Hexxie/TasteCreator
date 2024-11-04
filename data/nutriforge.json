@@ -82,6 +82,21 @@
         {"source": "Курка", "target": "Кокосове молоко"},
         {"source": "Курка", "target": "Сметана"},
         {"source": "Курка", "target": "Інжир"},
-        {"source": "Курка", "target": "Часник"}
+        {"source": "Курка", "target": "Часник"},
+        {"source": "Яйця", "target": "Анчоуси"},
+        {"source": "Яйця", "target": "Артішок"},
+        {"source": "Яйця", "target": "Аспарагус"},
+        {"source": "Яйця", "target": "Бекон"},
+        {"source": "Яйця", "target": "Базилік"},
+        {"source": "Яйця", "target": "Болгарський перець"},
+        {"source": "Яйця", "target": "Печериці"},
+        {"source": "Яйця", "target": "Оливки"},
+        {"source": "Яйця", "target": "Сіль"},
+        {"source": "Яйця", "target": "Сосиски"},
+        {"source": "Яйця", "target": "Томат"},
+        {"source": "Яйця", "target": "Вершкове масло"},
+        {"source": "Яйця", "target": "Каррі"},
+        {"source": "Яйця", "target": "Імбир"},
+        {"source": "Яйця", "target": "Часник"}
     ]
 }
