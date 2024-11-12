@@ -113,6 +113,5 @@
     {"product": "Шафран", "taste": {"bitter": 5, "salty": 0, "sour": 0, "sweet": 0, "umami": 0}},
     {"product": "Щавель", "taste": {"bitter": 5, "salty": 0, "sour": 30, "sweet": 5, "umami": 0}},
     {"product": "Ягнятина", "taste": {"bitter": 0, "salty": 5, "sour": 0, "sweet": 0, "umami": 40}},
-    {"product": "Шпинат", "taste": {"bitter": 15,"salty": 5,"sour": 10,"sweet": 5,"umami": 5}
-    }
+    {"product": "Шпинат", "taste": {"bitter": 15,"salty": 5,"sour": 10,"sweet": 5,"umami": 5}}
 ]

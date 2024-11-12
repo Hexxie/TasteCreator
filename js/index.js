@@ -1,7 +1,9 @@
+import { clamp } from './utils.js';
+import ProductManager from './ProductManager.js';
+import FlavorsManager from './FlavorManager.js';
+
 Promise.all([
-  d3.json("data/nutriforge.json"),
-  d3.json("data/tasteprofiles.json"),
-  d3.json("data/translations.json")]).then(([data, tasteprofiles, translations]) => {
+  d3.json("data/nutriforge.json")]).then(([data]) => {
 
   let height = 500;
   let width = 1000;
@@ -9,143 +11,27 @@ Promise.all([
   const nodes = Array.from(new Set(data.links.flatMap(link => [link.source, link.target])))
             .map(id => ({ id }));
 
+  const flavorManager = new FlavorsManager("data/tasteprofiles.json");
+  flavorManager.loadTasteProfiles();
+  const productManager = new ProductManager("#recipe-list", flavorManager);
+
   let currentNode = null;
-  let currentNodes = [];
-
-  let totalFlavors = { bitter: 0, salty: 0, sour: 0, sweet: 0, umami: 0 };
-  let nodeFlavors = {};
-
-  let productWeights = {};
-
-  const flavorNames = {
-    bitter: "Гіркий",
-    salty: "Солоний",
-    sour: "Кислий",
-    sweet: "Солодкий",
-    umami: "Пряний"
-};
-
-function updateTotalFlavors() {
-  // Обнуляємо значення totalFlavors
-  totalFlavors = { bitter: 0, salty: 0, sour: 0, sweet: 0, umami: 0 };
-
-  // Загальна вага всіх продуктів
-  let totalWeight = Object.values(productWeights).reduce((a, b) => a + Number(b), 0);
-  
-  // Обчислюємо внесок кожного продукту в totalFlavors
-  for (let product in productWeights) {
-    let weight = productWeights[product];
-    let flavors = nodeFlavors[product];
-    
-    // Зважено додаємо кожен смак до totalFlavors
-    for (let flavor in flavors) {
-      totalFlavors[flavor] += (flavors[flavor] * weight) / totalWeight;
-    }
-  }
-}
-
-function updateTasteList() {
-  updateTotalFlavors();
-
-  d3.select("#taste-list").selectAll("li").remove();
-  
-  d3.select("#taste-list")
-      .selectAll("li")
-      .data(
-        Object.entries(totalFlavors)
-        .filter(([key, value]) => value > 0)
-        .sort((a, b) => b[1] - a[1]))
-      .enter()
-      .append("li")
-      
-      .text(([key, value]) => `${flavorNames[key]}: ${value.toFixed(2)}`);
-}
-
-let debounceTimer;
-
-function updateRecipeList() {
-
-  d3.select("#recipe-list")
-    .selectAll("li")
-    .data(currentNodes, d => d)
-    .enter()
-    .append("li")
-    .each(function(d) {
-      productWeights[d] = 100;
-      d3.select(this)
-        .append("span")
-        .text(d + ": ");
-      
-      d3.select(this)
-        .append("input")
-        .attr("type", "number")
-        .attr("value", 100)
-        .attr("min", 1)
-        .on("input", function() {
-          console.log(d + " weight new value: " + this.value)
-          productWeights[d] = this.value;
-
-          clearTimeout(debounceTimer);
-
-          debounceTimer = setTimeout(() => {
-            updateTasteList();
-          }, 500); // 500 ms delay
-        });
-      
-      d3.select(this)
-        .append("span")
-        .text(" г");
-    }),
-    exit => exit.remove();
-}
+  let activatedNodes = [];
 
   function addCurrentNode(currentNode) {
-    const index = currentNodes.indexOf(currentNode);
-    if (index === -1) {
-      currentNodes.push(currentNode);
+    if (!activatedNodes.includes(currentNode)) {
+        activatedNodes.push(currentNode);
     }
-    updateRecipeList();
-
-    // This line to fetch taste from  the python (TODO)
-    if (nodeFlavors[currentNode]) {
-      // Додаємо значення з уже збережених смаків
-      Object.keys(nodeFlavors[currentNode]).forEach(key => {
-          totalFlavors[key] += nodeFlavors[currentNode][key];
-      });
-      updateTasteList();
-  } else {
-    const product = tasteprofiles.find(item => item.product === currentNode);
-    console.log('Flavor Count:', product.taste);
-
-    // Зберігаємо отримані смакі для вузла в nodeFlavors
-    nodeFlavors[currentNode] = product.taste;
-
-    // Додаємо значення смаків до totalFlavors
-    Object.keys(product.taste).forEach(key => {
-      totalFlavors[key] += product.taste[key];
-    });
-
-    updateTasteList();
-  }
-
-    console.log(currentNodes);
-    updateGraph(currentNodes);
+    productManager.addProduct(currentNode);
+    updateGraph(activatedNodes);
   }
 
   function removeCurrentNode(currentNode) {
-    const index = currentNodes.indexOf(currentNode);
+    const index = activatedNodes.indexOf(currentNode);
     if (index !== -1) {
-      currentNodes.splice(index, 1);
-
-      if (nodeFlavors[currentNode]) {
-        Object.keys(nodeFlavors[currentNode]).forEach(key => {
-            totalFlavors[key] -= nodeFlavors[currentNode][key];
-        });
-        updateRecipeList();
-        updateTasteList();
+      productManager.removeProduct(currentNode);
     }
-    }
-    console.log(currentNodes);
+    console.log(activatedNodes);
   }
 
   //Search of the product and highlight it on graph
@@ -201,7 +87,7 @@ function updateRecipeList() {
                               //  console.log(d.id);
                                 return d.id;
                               })
-                              .style("visibility", d => currentNodes.map(node => node.trim()).includes(d.id.trim()) ? "visible" : "hidden");
+                              .style("visibility", d => activatedNodes.map(node => node.trim()).includes(d.id.trim()) ? "visible" : "hidden");
 
   node.raise();
   labels.raise();
@@ -259,10 +145,6 @@ function updateRecipeList() {
     d3.select(this).classed("fixed", true);
   }
 
-  function clamp(x, lo, hi) {
-    return x < lo ? lo : x > hi ? hi : x;
-  }
-
   function dragged(event, d) {
     d.fx = clamp(event.x, 0, width);
     d.fy = clamp(event.y, 0, height);
@@ -279,10 +161,10 @@ function updateRecipeList() {
       .style("visibility", "visible");
   }
   
-  function updateGraph(currentNodes) {
+  function updateGraph(activatedNodes) {
     // Фільтруємо зв'язки, які мають source або target у selectedNodes
     const filteredLinks = data.links.filter(link => 
-      currentNodes.includes(link.source.id) || currentNodes.includes(link.target.id)
+      activatedNodes.includes(link.source.id) || activatedNodes.includes(link.target.id)
     );
   
     // Створюємо множину всіх вузлів, які з'єднані з вузлами у selectedNodes
@@ -297,7 +179,7 @@ function updateRecipeList() {
   
     // Оновлюємо видимість зв'язків
     link
-      .style("opacity", d => (currentNodes.includes(d.source.id) || currentNodes.includes(d.target.id)) ? 1 : 0);
+      .style("opacity", d => (activatedNodes.includes(d.source.id) || activatedNodes.includes(d.target.id)) ? 1 : 0);
   }
 
 });
