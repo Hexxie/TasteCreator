@@ -58,7 +58,9 @@ Promise.all([
     console.log("clicked on Омлет з сиром");
     const element = d3.select(this);
     if (element.classed("active")) {
+
       element.classed("active", false);
+
     } else {
       element.classed("active", true);
       const recipe = recipes.find(item => item.id === 1);
@@ -210,10 +212,11 @@ Promise.all([
   
   function updateGraph(activatedNodes) {
     if (activatedNodes.length === 0) {
-      // Show all nodes and links if there are no activated nodes
-      //node.style("opacity", 0.5);
-      //link.style("opacity", 0.5);
-      d3.selectAll("circle").classed("fixed". false)
+      // Reset all nodes and links to default state
+      d3.selectAll("circle").classed("fixed", false);
+      d3.selectAll("circle").style("opacity", 0.5); // Reset opacity for all nodes
+      d3.selectAll("line").style("opacity", 0.5);   // Reset opacity for all links
+      d3.selectAll("text.label").style("visibility", "hidden"); // Hide all labels
     } else {
       highlightCurrentNodes(activatedNodes);
 
@@ -228,10 +231,16 @@ Promise.all([
       nodes.forEach(nodeId => connectedNodes.add(nodeId));
     
       // Оновлюємо видимість вузлів
-      //node.style("opacity", d => connectedNodes.has(d.id) ? 1 : 0); // Приховуємо не пов'язані вузли
+      d3.selectAll("circle")
+            .style("opacity", d => {
+                if (activatedNodes.includes(d.id)) {
+                    return 1; // Fully visible for activated nodes
+                }
+                return connectedNodes.has(d.id) ? 0.5 : 0; // Dim connected nodes, hide others
+            });
     
       // Оновлюємо видимість зв'язків
-      //link.style("opacity", d => (activatedNodes.includes(d.source.id) || activatedNodes.includes(d.target.id)) ? 0.5 : 0);
+      link.style("opacity", d => (activatedNodes.includes(d.source.id) || activatedNodes.includes(d.target.id)) ? 0.5 : 0);
     }
   }
 
