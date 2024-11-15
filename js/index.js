@@ -3,7 +3,8 @@ import ProductManager from './ProductManager.js';
 import FlavorsManager from './FlavorManager.js';
 
 Promise.all([
-  d3.json("data/nutriforge.json")]).then(([data]) => {
+  d3.json("data/nutriforge.json"),
+  d3.json("data/recipes.json")]).then(([data, recipes]) => {
 
   let height = 500;
   let width = 1000;
@@ -18,20 +19,28 @@ Promise.all([
   let currentNode = null;
   let activatedNodes = [];
 
-  function addCurrentNode(currentNode) {
+  function addCurrentNode(currentNode, productWeight=100) {
     if (!activatedNodes.includes(currentNode)) {
         activatedNodes.push(currentNode);
     }
-    productManager.addProduct(currentNode);
+    productManager.addProduct(currentNode, productWeight);
     updateGraph(activatedNodes);
   }
 
   function removeCurrentNode(currentNode) {
     const index = activatedNodes.indexOf(currentNode);
     if (index !== -1) {
+      activatedNodes.splice(index, 1);
       productManager.removeProduct(currentNode);
+      updateGraph(activatedNodes);
     }
     console.log(activatedNodes);
+  }
+
+  function resetCurrentNodes() {
+    activatedNodes = [];
+    productManager.removeAllProducts();
+    updateGraph(activatedNodes);
   }
 
   //Search of the product and highlight it on graph
@@ -42,6 +51,24 @@ Promise.all([
     addCurrentNode(currentNode);
 
     d3.select("#input-box").property("value", "");
+  });
+
+  d3.select("#recipe-1").on("click", function() {
+    resetCurrentNodes();
+    console.log("clicked on Омлет з сиром");
+    const element = d3.select(this);
+    if (element.classed("active")) {
+      element.classed("active", false);
+    } else {
+      element.classed("active", true);
+      const recipe = recipes.find(item => item.id === 1);
+      console.log(recipe)
+      Object.keys(recipe.products).forEach(key => {
+       // this.activeFlavors[key] += (flavor[key] * weight) / totalWeight;
+        console.log(key + ": " + recipe.products[key])
+        addCurrentNode(key, recipe.products[key])
+      });
+    }
   });
 
   var node = d3.select("svg").selectAll("circle")
@@ -96,6 +123,7 @@ Promise.all([
                       .force("link", d3.forceLink(data.links).id(d => d.id)) 
                       .force("charge", d3.forceManyBody())
                       .force("center", d3.forceCenter(500, 250))
+                      .force("collide", d3.forceCollide().radius(d => 5).iterations(5)) 
                       .on("tick", ticked);
                     
   const drag = d3.drag()
@@ -151,6 +179,25 @@ Promise.all([
     simulation.alpha(1).restart();
   }
 
+  function highlightCurrentNodes(currentNodes) {                                  
+    // Ensure currentNodes is an array
+    if (!Array.isArray(currentNodes)) {
+        console.error("currentNodes should be an array");
+        return;
+    }
+
+    currentNodes.forEach(currentNode => {
+        // Highlight circles
+        d3.selectAll("circle")
+          .filter(d => d.id === currentNode)
+          .classed("fixed", true);
+        
+        // Make corresponding labels visible
+        d3.select(`#label-${currentNode.replace(/\s+/g, "_")}`)
+          .style("visibility", "visible")
+          .style("opacity", 1);
+    });
+}
 
   function highlightCurrentNode(currentNode) {                                  
     d3.selectAll("circle")
@@ -162,24 +209,30 @@ Promise.all([
   }
   
   function updateGraph(activatedNodes) {
-    // Фільтруємо зв'язки, які мають source або target у selectedNodes
-    const filteredLinks = data.links.filter(link => 
-      activatedNodes.includes(link.source.id) || activatedNodes.includes(link.target.id)
-    );
-  
-    // Створюємо множину всіх вузлів, які з'єднані з вузлами у selectedNodes
-    const connectedNodes = new Set(filteredLinks.flatMap(link => [link.source.id, link.target.id]));
-  
-    // Додаємо обрані вузли до connectedNodes, щоб вони залишалися видимими
-    nodes.forEach(nodeId => connectedNodes.add(nodeId));
-  
-    // Оновлюємо видимість вузлів
-    node
-      .style("opacity", d => connectedNodes.has(d.id) ? 1 : 0); // Приховуємо не пов'язані вузли
-  
-    // Оновлюємо видимість зв'язків
-    link
-      .style("opacity", d => (activatedNodes.includes(d.source.id) || activatedNodes.includes(d.target.id)) ? 1 : 0);
+    if (activatedNodes.length === 0) {
+      // Show all nodes and links if there are no activated nodes
+      //node.style("opacity", 0.5);
+      //link.style("opacity", 0.5);
+      d3.selectAll("circle").classed("fixed". false)
+    } else {
+      highlightCurrentNodes(activatedNodes);
+
+      const filteredLinks = data.links.filter(link => 
+        activatedNodes.includes(link.source.id) || activatedNodes.includes(link.target.id)
+      );
+    
+      // Створюємо множину всіх вузлів, які з'єднані з вузлами у selectedNodes
+      const connectedNodes = new Set(filteredLinks.flatMap(link => [link.source.id, link.target.id]));
+    
+      // Додаємо обрані вузли до connectedNodes, щоб вони залишалися видимими
+      nodes.forEach(nodeId => connectedNodes.add(nodeId));
+    
+      // Оновлюємо видимість вузлів
+      //node.style("opacity", d => connectedNodes.has(d.id) ? 1 : 0); // Приховуємо не пов'язані вузли
+    
+      // Оновлюємо видимість зв'язків
+      //link.style("opacity", d => (activatedNodes.includes(d.source.id) || activatedNodes.includes(d.target.id)) ? 0.5 : 0);
+    }
   }
 
 });

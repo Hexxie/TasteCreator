@@ -91,6 +91,19 @@ svg {
     transition: background 0.3s ease; /* Плавний перехід кольору */
 }
 
+.recipe-btn.active {
+    background: #e0e0e0;
+    padding: 5px;
+    margin: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    border-color: #999;
+    width: 200px;
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.3s ease; /* Плавний перехід кольору */
+}
+
 .recipe-btn:hover {
     background: #e0e0e0; /* Новий колір при наведенні */
     border-color: #999; /* Зміна кольору рамки при наведенні */

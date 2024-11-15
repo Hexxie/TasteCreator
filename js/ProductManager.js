@@ -6,9 +6,10 @@ class ProductManager {
         this.debounceTimer = null; 
     }
 
-    addProduct(productName) {
+    addProduct(productName, weight=100) {
         // Specify default product weight as 100gram
-        this.productWeights[productName] = 100;
+        console.log("ProductManager: " + productName + ": " + weight)
+        this.productWeights[productName] = weight;
         
         // Create list item for product in recipeListSelector
         const productItem = this.recipeList
@@ -23,7 +24,7 @@ class ProductManager {
         productItem
             .append("input")
             .attr("type", "number")
-            .attr("value", 100)
+            .attr("value", weight)
             .attr("min", 1)
             .on("input", (event) => this.updateProductWeight(event, productName));
 
@@ -40,6 +41,12 @@ class ProductManager {
 
         this.recipeList.select(`#product-${productName}`).remove();
 
+        this.flavorManager.applyTastes(this.productWeights);
+    }
+
+    removeAllProducts() {
+        this.productWeights = {};
+        this.recipeList.selectAll("li").remove();
         this.flavorManager.applyTastes(this.productWeights);
     }
 
