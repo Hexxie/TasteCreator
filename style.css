@@ -109,6 +109,23 @@ svg {
     border-color: #999; /* Зміна кольору рамки при наведенні */
 }
 
+.reset-btn {
+    background: #ffffff;
+    padding: 5px;
+    margin: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 200px;
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.3s ease; /* Плавний перехід кольору */
+}
+
+.reset-btn:hover {
+    background: rgb(243, 220, 177); /* Новий колір при наведенні */
+    border-color: #999; /* Зміна кольору рамки при наведенні */
+}
+
 .link.fixed {
     stroke: orange;
     stroke-width: 1.5px;

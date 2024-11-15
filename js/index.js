@@ -40,7 +40,31 @@ Promise.all([
   function resetCurrentNodes() {
     activatedNodes = [];
     productManager.removeAllProducts();
-    updateGraph(activatedNodes);
+    //updateGraph(activatedNodes);
+
+        // Reset node positions
+        nodes.forEach(node => {
+          delete node.fx; // Remove fixed positions
+          delete node.fy;
+          node.x = Math.random() * width; // Reinitialize positions
+          node.y = Math.random() * height;
+      });
+  
+      // Reset graph styles
+      d3.selectAll("circle")
+          .classed("fixed", false)
+          .style("opacity", 0.5); // Reset opacity to full
+  
+      d3.selectAll("line")
+          .style("opacity", 0.5); // Reset opacity to full
+  
+      d3.selectAll("text.label")
+          .style("visibility", "hidden"); // Hide all labels
+  
+      // Restart the simulation
+      simulation.alpha(1).restart();
+  
+      console.log("Graph has been reset");
   }
 
   //Search of the product and highlight it on graph
@@ -71,6 +95,11 @@ Promise.all([
         addCurrentNode(key, recipe.products[key])
       });
     }
+  });
+
+  d3.select("#reset").on("click", function() {
+    resetCurrentNodes();
+    console.log("clicked on Reset");
   });
 
   var node = d3.select("svg").selectAll("circle")
