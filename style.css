@@ -157,4 +157,10 @@ input[type="number"] {
     border-color: #66afe9;
     outline: none;
     box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);
-  }  
+  }
+
+#taste-list {
+    list-style-type: none; /* Removes the dots */
+    padding: 0; /* Optional: Removes left padding */
+    margin: 0; /* Optional: Removes default margin */
+}

@@ -93,7 +93,8 @@ class FlavorsManager {
             .data(data)
             .enter()
             .append("li")
-            .text(([key, value]) => `${flavorNames[key]}: ${value.toFixed(2)}`);
+            .text(([key, value]) => `${flavorNames[key]}`)
+            .style("font-size", ([, value]) => `${Math.min(10 + value * 2, 40)}px`);
     }
 
 }
